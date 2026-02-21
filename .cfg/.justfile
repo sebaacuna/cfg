@@ -49,6 +49,6 @@ sync:
     @{{ git }} push --quiet
     @printf '\033[32m==>\033[0m Synchronization done!\n'
 
-# List all tracked files
+# List all tracked files (respects sparse-checkout exclusions)
 ls:
-    {{ git }} ls-tree --name-only -r HEAD
+    @{{ git }} ls-files -t | sed -n 's/^H //p'
