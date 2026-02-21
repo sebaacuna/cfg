@@ -33,17 +33,18 @@ sync:
        printf '\033[2m    no local changes\033[0m\n'; \
      fi
     @printf '\033[32m==>\033[0m Pulling w/rebase\n'
-    @if {{ git }} rev-parse --verify '@{u}' >/dev/null 2>&1; then \
+    @branch=$({{ git }} symbolic-ref --short HEAD 2>/dev/null); \
+     if [ -n "$branch" ] && {{ git }} rev-parse --verify "origin/$branch" >/dev/null 2>&1; then \
        {{ git }} fetch --quiet; \
-       incoming=$({{ git }} diff --name-only 'HEAD...@{u}' 2>/dev/null); \
+       incoming=$({{ git }} diff --name-only "HEAD...origin/$branch" 2>/dev/null); \
        if [ -n "$incoming" ]; then \
          echo "$incoming" | while read -r f; do printf '\033[2m  %s\033[0m\n' "$f"; done; \
-         {{ git }} rebase --quiet '@{u}'; \
+         {{ git }} rebase --quiet "origin/$branch"; \
        else \
          printf '\033[2m    already up to date\033[0m\n'; \
        fi; \
      else \
-       printf '\033[2m    no upstream configured, skipping\033[0m\n'; \
+       printf '\033[2m    no remote branch, skipping\033[0m\n'; \
      fi
     @printf '\033[32m==>\033[0m Pushing\n'
     @{{ git }} push --quiet
