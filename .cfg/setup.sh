@@ -104,6 +104,10 @@ cfg_git config --local status.showUntrackedFiles no
 # "no upstream branch" error on first push to an empty repo).
 cfg_git config --local push.autoSetupRemote true
 
+# Exclude repo-only files (README, .gitignore) from the $HOME work tree.
+cfg_git sparse-checkout init --no-cone
+cfg_git sparse-checkout set '/*' '!README.md' '!.gitignore'
+
 if cfg_git rev-parse --verify HEAD >/dev/null 2>&1; then
     # ── Push access check (non-empty repo only) ──────────────────────────────
 
