@@ -33,17 +33,17 @@ sync:
        printf '\033[2m    no local changes\033[0m\n'; \
      fi
     @printf '\033[32m==>\033[0m Pulling w/rebase\n'
-    @before=$({{ git }} rev-parse HEAD 2>/dev/null || echo none); \
-     if {{ git }} rev-parse --verify '@{u}' >/dev/null 2>&1; then \
-       {{ git }} pull --rebase --quiet; \
-       after=$({{ git }} rev-parse HEAD 2>/dev/null || echo none); \
-       if [ "$before" = "$after" ]; then \
-         printf '\033[2m    already up to date\033[0m\n'; \
+    @if {{ git }} rev-parse --verify '@{u}' >/dev/null 2>&1; then \
+       {{ git }} fetch --quiet; \
+       incoming=$({{ git }} diff --name-only 'HEAD...@{u}' 2>/dev/null); \
+       if [ -n "$incoming" ]; then \
+         echo "$incoming" | while read -r f; do printf '\033[2m  %s\033[0m\n' "$f"; done; \
+         {{ git }} rebase --quiet '@{u}'; \
        else \
-         {{ git }} diff --name-only "$before".."$after" | while read -r f; do printf '\033[2m  %s\033[0m\n' "$f"; done; \
+         printf '\033[2m    already up to date\033[0m\n'; \
        fi; \
      else \
-       printf '\033[2m    no upstream configured, skipping pull\033[0m\n'; \
+       printf '\033[2m    no upstream configured, skipping\033[0m\n'; \
      fi
     @printf '\033[32m==>\033[0m Pushing\n'
     @{{ git }} push --quiet
